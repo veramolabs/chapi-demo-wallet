@@ -67,35 +67,40 @@ async function refreshAgentArea() {
   const { veramoAgentUrl, veramoAgentApiKey } = loadCurrentVeramoAgent();
   document.getElementById('veramoAgent').innerHTML = veramoAgentUrl;
 
-  if(veramoAgentUrl) {
+  try {
+    if(veramoAgentUrl) {
 
-    document.getElementById('connected').classList.remove('hide');
-    document.getElementById('disconnected').classList.add('hide');
+      document.getElementById('connected').classList.remove('hide');
+      document.getElementById('disconnected').classList.add('hide');
 
-    const walletContents = await loadWalletContents();
+      const walletContents = await loadWalletContents();
 
-    if(!walletContents) {
-      return addToWalletDisplay({text: 'none'});
+      if(!walletContents) {
+        return addToWalletDisplay({text: 'none'});
+      }
+    
+      for(const entry of walletContents) {
+        addToWalletDisplay({
+          text: `${getCredentialType(entry.verifiableCredential)} Verifiable Credential from issuer ${entry.verifiableCredential.issuer.id}`,
+          walletEntry: entry,
+          shareButton: (typeof shareButton === 'undefined') ? null : shareButton
+        });
+      }
+      return;
     }
-  
-    for(const entry of walletContents) {
-      addToWalletDisplay({
-        text: `${getCredentialType(entry.verifiableCredential)} Verifiable Credential from issuer ${entry.verifiableCredential.issuer.id}`,
-        walletEntry: entry,
-        shareButton: (typeof shareButton === 'undefined') ? null : shareButton
-      });
-    }    
-  } else {
-    // not logged in
-    document.getElementById('connected').classList.add('hide');
-    document.getElementById('disconnected').classList.remove('hide');
-
-    document.getElementById('inputVeramoAgentUrl').value = VERAMO_AGENT_BASE_URL;
-    document.getElementById('inputVeramoAgentApiKey').value = VERAMO_AGENT_API_KEY;
-  
-    // Refresh the user's list of wallet contents
-    clearWalletDisplay();
+  } catch (error) {
+    console.log(error);
   }
+  
+  // not logged in
+  document.getElementById('connected').classList.add('hide');
+  document.getElementById('disconnected').classList.remove('hide');
+
+  document.getElementById('inputVeramoAgentUrl').value = VERAMO_AGENT_BASE_URL;
+  document.getElementById('inputVeramoAgentApiKey').value = VERAMO_AGENT_API_KEY;
+
+  // Refresh the user's list of wallet contents
+  clearWalletDisplay();
 }
 
 /**
