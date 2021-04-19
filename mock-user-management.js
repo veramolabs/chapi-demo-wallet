@@ -8,7 +8,6 @@
  */
  
 async function postData({url = '', data = {}, token = ''}) {
-
   console.log('sending post data request: url: ' + url + ', token: ' + token);
 
   var headers = {
@@ -31,7 +30,6 @@ async function postData({url = '', data = {}, token = ''}) {
     referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
     body: JSON.stringify(data) // body data type must match "Content-Type" header
   });
-  //return response.json(); // parses JSON response into native JavaScript objects
 }
 
 /**
@@ -43,7 +41,6 @@ async function connect() {
 
   const inputUrl = document.getElementById('inputVeramoAgentUrl').value.trim();
   const inputApiKey = document.getElementById('inputVeramoAgentApiKey').value.trim();
-  
   const url = inputUrl === '' ? VERAMO_AGENT_BASE_URL : inputUrl;
   const apiKey = inputApiKey === '' ? VERAMO_AGENT_API_KEY : inputApiKey;
 
@@ -55,6 +52,7 @@ async function connect() {
 
 async function disconnect() {
   console.log('disconnect...');
+
   resetCurrentVeramoAgent();
   clearWalletDisplay();
   clearWalletStorage();
@@ -66,7 +64,6 @@ async function refreshAgentArea() {
 
   const { veramoAgentUrl, veramoAgentApiKey } = loadCurrentVeramoAgent();
   document.getElementById('veramoAgent').innerHTML = veramoAgentUrl;
-
   try {
     if(veramoAgentUrl) {
 
@@ -106,7 +103,6 @@ async function refreshAgentArea() {
 /**
  * Wallet Storage / Persistence
  */
-
 async function loadWalletContents() {
   console.log('loadWalletContents...');
   const {veramoAgentUrl, veramoAgentApiKey} = loadCurrentVeramoAgent();
@@ -116,9 +112,7 @@ async function loadWalletContents() {
 }
 
 async function createVerifiablePresentation({holder, verifiableCredential}) {
-
   const {veramoAgentUrl, veramoAgentApiKey} = loadCurrentVeramoAgent();
-
   const data = 
   {
     presentation: {
@@ -202,7 +196,6 @@ function getCredentialType(vc) {
 /**
  * User Storage / Persistence
  */
-
 function loadCurrentVeramoAgent() {
   console.log('Loading veramoAgent cookie.');
   const config = {
