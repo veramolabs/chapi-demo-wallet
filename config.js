@@ -14,4 +14,4 @@ const MEDIATOR = 'https://authn.io/mediator' + '?origin=' +
 const WALLET_LOCATION = window.location.origin + '/';
 
 const VERAMO_AGENT_BASE_URL = 'https://iiw32.veramo.dev';
-const VERAMO_AGENT_API_KEY = '22sooKm676YfR8ZN';
+const VERAMO_AGENT_API_KEY = '';
