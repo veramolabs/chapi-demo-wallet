@@ -162,8 +162,6 @@ function addToWalletDisplay({text, walletEntry, shareButton}) {
       li.appendChild(shareButtonNode);     
   
       shareButtonNode.addEventListener('click', async () => {
-      // document.getElementById(walletEntry.hash).addEventListener('click', async () => {
-  
         let vp = null;
         if (walletEntry.verifiableCredential.proof.type === 'JwtProof2020') {
           vp = await createVerifiablePresentation( 
