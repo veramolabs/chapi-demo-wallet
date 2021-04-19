@@ -1,3 +1,7 @@
+.vc-description {
+	overflow-wrap: break-word;
+}
+
 .json-viewer {
 	color: #000;
 	padding-left: 20px;

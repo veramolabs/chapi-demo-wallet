@@ -71,7 +71,7 @@ async function refreshAgentArea() {
       const walletContents = await loadWalletContents();
 
       if(!walletContents || walletContents.length < 1) {
-        return addToWalletDisplay({text: 'none'});
+        return addToWalletDisplay({text: 'empty'});
       }
     
       for(const entry of walletContents) {
@@ -133,34 +133,36 @@ function clearWalletStorage() {
 }
 
 function clearWalletDisplay() {
+  jsonViewer.showJSON({}, null, 1);
   const contents = document.getElementById('walletContents');
   while(contents.firstChild)
     contents.removeChild(contents.firstChild);
 }
 
 function addToWalletDisplay({text, walletEntry, shareButton}) {
-  const li = document.createElement('li');
+  const tr = document.createElement('tr');
+  
+  const tdDescription = document.createElement('td');
+  const tdShow = document.createElement('td');
+  const tdShare = document.createElement('td');
 
-  if (walletEntry) {
+  if (walletEntry) {    
     const showButtonNode = document.createElement('a');
     showButtonNode.classList.add('waves-effect', 'waves-light', 'btn-small');
     showButtonNode.setAttribute('id', 'show-' + walletEntry.hash);
     showButtonNode.appendChild(document.createTextNode('Show'));
-    li.appendChild(showButtonNode);
 
     // jsonViewer defined in index.html/wallet-ui-get.html
     showButtonNode.addEventListener('click', () => {
       jsonViewer.showJSON(walletEntry.verifiableCredential, null, 1);
     });
+    tdShow.appendChild(showButtonNode);
 
     if(shareButton) {
-      li.appendChild(document.createTextNode(' '));
       const shareButtonNode = document.createElement('a');
-      shareButtonNode.classList.add('waves-effect', 'waves-light', 'btn-small');
+      shareButtonNode.classList.add('waves-effect', 'waves-light', 'btn-small');      
       shareButtonNode.setAttribute('id', walletEntry.hash);
-      shareButtonNode.appendChild(document.createTextNode(shareButton.text));
-      li.appendChild(shareButtonNode);     
-  
+      shareButtonNode.appendChild(document.createTextNode(shareButton.text));  
       shareButtonNode.addEventListener('click', async () => {
         let vp = null;
         if (walletEntry.verifiableCredential.proof.type === 'JwtProof2020') {
@@ -177,16 +179,22 @@ function addToWalletDisplay({text, walletEntry, shareButton}) {
   
         shareButton.sourceEvent
           .respondWith(Promise.resolve({dataType: 'VerifiablePresentation', data: vp}));
-      });    
-    }    
+      });
+
+      tdShare.appendChild(shareButtonNode);
+    } 
   }
+  
+  tr.appendChild(tdShow);  
+  tr.appendChild(tdShare);
 
   const textNode = document.createElement('p');
-  li.appendChild(textNode);
-  textNode.appendChild(document.createTextNode(text));
+  tdDescription.appendChild(textNode);
+  textNode.appendChild(document.createTextNode(text));  
+  tr.appendChild(tdDescription);
 
   document.getElementById('walletContents')
-    .appendChild(li);
+    .appendChild(tr);
 }
 
 function getCredentialType(vc) {

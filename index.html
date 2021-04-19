@@ -21,6 +21,7 @@
 
   <!--JSON viewer-->
   <script type="text/javascript" src="json-viewer.js"></script>
+  <link rel="stylesheet" type="text/css" href="wallet.css">
   <link rel="stylesheet" type="text/css" href="json-viewer.css">
 
   <!--Simple cookie lib-->
@@ -40,8 +41,22 @@
       <p>
         <strong>Connected agent:</strong> <span id="veramoAgent"></span>
 
-        <h6>Wallet Contents:</h6>
-        <ol id="walletContents"></ol>
+        <!-- <h6>Wallet Contents:</h6> -->
+        <table>
+          <thead>
+            <tr>
+              <th colspan="3">Wallet Contents</th>
+            </tr>
+            <tr>
+              <th></th>
+              <th></th>
+              <th>Description</th>
+            </tr>  
+          </thead>
+          <tbody id="walletContents"></tbody>
+        </table>
+        
+        <!-- <ul id="walletContents"></ul> -->
 
         <div id="json"></div>
 
