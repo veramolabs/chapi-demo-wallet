@@ -141,7 +141,7 @@ function clearWalletDisplay() {
 function addToWalletDisplay({text, walletEntry, shareButton}) {
   const li = document.createElement('li');
 
-  if (walletEntry && typeof walletEntry.proof.jwt !== 'undefined') {
+  if (walletEntry && typeof walletEntry.verifiableCredential.proof.jwt !== 'undefined') {
     const showButtonNode = document.createElement('a');
     showButtonNode.classList.add('waves-effect', 'waves-light', 'btn-small');
     showButtonNode.setAttribute('id', 'show-' + walletEntry.hash);
