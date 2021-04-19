@@ -38,10 +38,14 @@ async function postData({url = '', data = {}, token = ''}) {
  * UI Management
  */
 
-async function connect({veramoAgentUrl = '', veramoAgentApiKey = ''}) { 
+async function connect() { 
   console.log('connect...');
-  const url = veramoAgentUrl === '' ? VERAMO_AGENT_BASE_URL : veramoAgentUrl;
-  const apiKey = veramoAgentApiKey === '' ? VERAMO_AGENT_API_KEY : veramoAgentApiKey;
+
+  const inputUrl = document.getElementById('inputVeramoAgentUrl').value.trim();
+  const inputApiKey = document.getElementById('inputVeramoAgentApiKey').value.trim();
+  
+  const url = inputUrl === '' ? VERAMO_AGENT_BASE_URL : inputUrl;
+  const apiKey = inputApiKey === '' ? VERAMO_AGENT_API_KEY : inputApiKey;
 
   console.log('connect: url: ' + url + ', key: ' + apiKey);
 
@@ -84,6 +88,10 @@ async function refreshAgentArea({shareButton} = {}) {
     // not logged in
     document.getElementById('connected').classList.add('hide');
     document.getElementById('disconnected').classList.remove('hide');
+
+    document.getElementById('inputVeramoAgentUrl').value = VERAMO_AGENT_BASE_URL;
+    document.getElementById('inputVeramoAgentApiKey').value = VERAMO_AGENT_API_KEY;
+  
     // Refresh the user's list of wallet contents
     clearWalletDisplay();
   }
