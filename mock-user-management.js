@@ -6,7 +6,6 @@
 /**
  * Helper function
  */
- 
 async function postData({url = '', data = {}, token = ''}) {
   console.log('sending post data request: url: ' + url + ', token: ' + token);
 
@@ -35,7 +34,6 @@ async function postData({url = '', data = {}, token = ''}) {
 /**
  * UI Management
  */
-
 async function connect() { 
   console.log('connect...');
 
@@ -143,28 +141,7 @@ function clearWalletDisplay() {
 function addToWalletDisplay({text, walletEntry, shareButton}) {
   const li = document.createElement('li');
 
-  if(shareButton) {
-    const shareButtonNode = document.createElement('a');
-    shareButtonNode.classList.add('waves-effect', 'waves-light', 'btn-small');
-    shareButtonNode.setAttribute('id', walletEntry.hash);
-    shareButtonNode.appendChild(document.createTextNode(shareButton.text));
-    li.appendChild(shareButtonNode);
-    li.appendChild(document.createTextNode(' '));
-
-    document.getElementById(walletEntry.hash).addEventListener('click', async () => {
-
-      const vp = await createVerifiablePresentation( 
-        { holder: walletEntry.verifiableCredential.credentialSubject.id,
-          verifiableCredential: walletEntry.verifiableCredential.proof.jwt });
-
-      console.log('wrapping and returning vc:', vp);
-
-      shareButton.sourceEvent
-        .respondWith(Promise.resolve({dataType: 'VerifiablePresentation', data: vp}));
-    });    
-  }
-  
-  if (walletEntry) {
+  if (walletEntry && typeof walletEntry.proof.jwt !== 'undefined') {
     const showButtonNode = document.createElement('a');
     showButtonNode.classList.add('waves-effect', 'waves-light', 'btn-small');
     showButtonNode.setAttribute('id', 'show-' + walletEntry.hash);
@@ -174,7 +151,28 @@ function addToWalletDisplay({text, walletEntry, shareButton}) {
     // jsonViewer defined in index.html/wallet-ui-get.html
     showButtonNode.addEventListener('click', () => {
       jsonViewer.showJSON(walletEntry.verifiableCredential, null, 1);
-    });    
+    });
+
+    if(shareButton) {
+      const shareButtonNode = document.createElement('a');
+      shareButtonNode.classList.add('waves-effect', 'waves-light', 'btn-small');
+      shareButtonNode.setAttribute('id', walletEntry.hash);
+      shareButtonNode.appendChild(document.createTextNode(shareButton.text));
+      li.appendChild(shareButtonNode);
+      li.appendChild(document.createTextNode(' '));
+  
+      document.getElementById(walletEntry.hash).addEventListener('click', async () => {
+  
+        const vp = await createVerifiablePresentation( 
+          { holder: walletEntry.verifiableCredential.credentialSubject.id,
+            verifiableCredential: walletEntry.verifiableCredential.proof.jwt });
+  
+        console.log('wrapping and returning vc:', vp);
+  
+        shareButton.sourceEvent
+          .respondWith(Promise.resolve({dataType: 'VerifiablePresentation', data: vp}));
+      });    
+    }    
   }
 
   const textNode = document.createElement('p');
