@@ -189,6 +189,7 @@ function addToWalletDisplay({text, walletEntry, shareButton}) {
   tr.appendChild(tdShare);
 
   const textNode = document.createElement('p');
+  textNode.classList.add('vc');
   tdDescription.appendChild(textNode);
   textNode.appendChild(document.createTextNode(text));  
   tr.appendChild(tdDescription);
