@@ -75,7 +75,7 @@ async function refreshAgentArea() {
 
       const walletContents = await loadWalletContents();
 
-      if(!walletContents) {
+      if(!walletContents || walletContents.length < 1) {
         return addToWalletDisplay({text: 'none'});
       }
     
@@ -156,27 +156,7 @@ function addToWalletDisplay({text, walletEntry, shareButton}) {
     shareButtonNode.appendChild(document.createTextNode(shareButton.text));
     li.appendChild(shareButtonNode);
     li.appendChild(document.createTextNode(' '));
-  }
-  
-  const showButtonNode = document.createElement('a');
-  showButtonNode.classList.add('waves-effect', 'waves-light', 'btn-small');
-  showButtonNode.setAttribute('id', 'show-' + walletEntry.hash);
-  showButtonNode.appendChild(document.createTextNode('Show'));
-  li.appendChild(showButtonNode);
 
-  // jsonViewer defined in index.html/wallet-ui-get.html
-  showButtonNode.addEventListener('click', () => {
-    jsonViewer.showJSON(walletEntry.verifiableCredential, null, 1);
-  });    
-
-  const textNode = document.createElement('p');
-  li.appendChild(textNode);
-  textNode.appendChild(document.createTextNode(text));
-
-  document.getElementById('walletContents')
-    .appendChild(li);
-
-  if(shareButton) {
     document.getElementById(walletEntry.hash).addEventListener('click', async () => {
 
       const vp = await createVerifiablePresentation( 
@@ -187,8 +167,28 @@ function addToWalletDisplay({text, walletEntry, shareButton}) {
 
       shareButton.sourceEvent
         .respondWith(Promise.resolve({dataType: 'VerifiablePresentation', data: vp}));
-    });
+    });    
   }
+  
+  if (walletEntry) {
+    const showButtonNode = document.createElement('a');
+    showButtonNode.classList.add('waves-effect', 'waves-light', 'btn-small');
+    showButtonNode.setAttribute('id', 'show-' + walletEntry.hash);
+    showButtonNode.appendChild(document.createTextNode('Show'));
+    li.appendChild(showButtonNode);
+
+    // jsonViewer defined in index.html/wallet-ui-get.html
+    showButtonNode.addEventListener('click', () => {
+      jsonViewer.showJSON(walletEntry.verifiableCredential, null, 1);
+    });    
+  }
+
+  const textNode = document.createElement('p');
+  li.appendChild(textNode);
+  textNode.appendChild(document.createTextNode(text));
+
+  document.getElementById('walletContents')
+    .appendChild(li);
 }
 
 function getCredentialType(vc) {
