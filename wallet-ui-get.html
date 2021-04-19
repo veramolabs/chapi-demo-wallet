@@ -61,6 +61,7 @@
         the <a href="https://chapi-wallet.veramo.dev/">Demo Wallet</a>).</li>
       <li>Click the <strong>Connect</strong> button.</li>
       <li>Click on a Share button next to an appropriate credential.</li>
+      <li>TEST.</li>      
     </ol>
 
     <p>
@@ -87,6 +88,8 @@
    *  * Persistence and user management - ./mock-user-management.js
    */
 
+  var shareButton = {};
+
   async function handleGetEvent() {
     const event = await WebCredentialHandler.receiveCredentialEvent();
 
@@ -104,12 +107,12 @@
     const requestReason = query.credentialQuery.reason;
     document.getElementById('requestReason').innerHTML = requestReason;
 
-    refreshAgentArea({
-      shareButton: {
+    shareButton = {
         text: 'Share',
         sourceEvent: event        
-      }
-    });
+    };
+    
+    refreshAgentArea();
 
     // const requestOptions = event.credentialRequestOptions || {web:{}};
     // document.getElementById('queryContents').innerHTML = JSON.stringify(requestOptions.web, null, 2);

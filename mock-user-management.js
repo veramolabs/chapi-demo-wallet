@@ -61,13 +61,14 @@ async function disconnect() {
   await refreshAgentArea();
 }
 
-async function refreshAgentArea({shareButton} = {}) {
+async function refreshAgentArea() {
   console.log('refreshAgentArea...');
 
   const { veramoAgentUrl, veramoAgentApiKey } = loadCurrentVeramoAgent();
   document.getElementById('veramoAgent').innerHTML = veramoAgentUrl;
 
   if(veramoAgentUrl) {
+
     document.getElementById('connected').classList.remove('hide');
     document.getElementById('disconnected').classList.add('hide');
 
@@ -81,7 +82,7 @@ async function refreshAgentArea({shareButton} = {}) {
       addToWalletDisplay({
         text: `${getCredentialType(entry.verifiableCredential)} Verifiable Credential from issuer ${entry.verifiableCredential.issuer.id}`,
         walletEntry: entry,
-        shareButton: shareButton
+        shareButton: (typeof shareButton === 'undefined') ? null : shareButton
       });
     }    
   } else {
@@ -219,6 +220,6 @@ function saveCurrentVeramoAgent({veramoAgentUrl, veramoAgentApiKey}) {
 
 function resetCurrentVeramoAgent() {
   console.log('Clearing veramoAgent cookie.');
-  Cookies.remove('veramoAgentUrl', {path: ''});
-  Cookies.remove('veramoAgentApiKey', {path: ''});
+  Cookies.set('veramoAgentUrl', '', {path: '', secure: true, sameSite: 'None'});
+  Cookies.set('veramoAgentApiKey', '', {path: '', secure: true, sameSite: 'None'});
 }
