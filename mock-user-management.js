@@ -6,18 +6,27 @@
 /**
  * Helper function
  */
+ 
+async function postData({url = '', data = {}, token = ''}) {
 
-async function postData(url = '', data = {}) {
+  console.log('sending post data request: url: ' + url + ', token: ' + token);
+
+  var headers = {
+    'Content-Type': 'application/json'
+    // 'Content-Type': 'application/x-www-form-urlencoded',
+  };
+
+  if (token !== '') {
+    headers.Authorization = 'Bearer ' + token;
+  }
+
   // Default options are marked with *
   return fetch(url, {
     method: 'POST', // *GET, POST, PUT, DELETE, etc.
     mode: 'cors', // no-cors, *cors, same-origin
     cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
     credentials: 'same-origin', // include, *same-origin, omit
-    headers: {
-      'Content-Type': 'application/json'
-      // 'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers,
     redirect: 'follow', // manual, *follow, error
     referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
     body: JSON.stringify(data) // body data type must match "Content-Type" header
@@ -29,12 +38,19 @@ async function postData(url = '', data = {}) {
  * UI Management
  */
 
-async function connect() {  
-  saveCurrentVeramoAgent(VERAMO_AGENT_BASE_URL);
+async function connect({veramoAgentUrl = '', veramoAgentApiKey = ''}) { 
+  console.log('connect...');
+  const url = veramoAgentUrl === '' ? VERAMO_AGENT_BASE_URL : veramoAgentUrl;
+  const apiKey = veramoAgentApiKey === '' ? VERAMO_AGENT_API_KEY : veramoAgentApiKey;
+
+  console.log('connect: url: ' + url + ', key: ' + apiKey);
+
+  saveCurrentVeramoAgent({veramoAgentUrl: url, veramoAgentApiKey: apiKey});
   await refreshAgentArea();
 }
 
 async function disconnect() {
+  console.log('disconnect...');
   resetCurrentVeramoAgent();
   clearWalletDisplay();
   clearWalletStorage();
@@ -42,32 +58,34 @@ async function disconnect() {
 }
 
 async function refreshAgentArea({shareButton} = {}) {
-  const veramoAgentUrl = loadCurrentVeramoAgent();
+  console.log('refreshAgentArea...');
+
+  const { veramoAgentUrl, veramoAgentApiKey } = loadCurrentVeramoAgent();
   document.getElementById('veramoAgent').innerHTML = veramoAgentUrl;
 
   if(veramoAgentUrl) {
     document.getElementById('connected').classList.remove('hide');
     document.getElementById('disconnected').classList.add('hide');
+
+    const walletContents = await loadWalletContents();
+
+    if(!walletContents) {
+      return addToWalletDisplay({text: 'none'});
+    }
+  
+    for(const entry of walletContents) {
+      addToWalletDisplay({
+        text: `${getCredentialType(entry.verifiableCredential)} Verifiable Credential from issuer ${entry.verifiableCredential.issuer.id}`,
+        walletEntry: entry,
+        shareButton: shareButton
+      });
+    }    
   } else {
     // not logged in
     document.getElementById('connected').classList.add('hide');
     document.getElementById('disconnected').classList.remove('hide');
-  }
-
-  // Refresh the user's list of wallet contents
-  clearWalletDisplay();
-  const walletContents = await loadWalletContents();
-
-  if(!walletContents) {
-    return addToWalletDisplay({text: 'none'});
-  }
-
-  for(const entry of walletContents) {
-    addToWalletDisplay({
-      text: `${getCredentialType(entry.verifiableCredential)} Verifiable Credential from issuer ${entry.verifiableCredential.issuer.id}`,
-      walletEntry: entry,
-      shareButton: shareButton
-    });
+    // Refresh the user's list of wallet contents
+    clearWalletDisplay();
   }
 }
 
@@ -76,12 +94,16 @@ async function refreshAgentArea({shareButton} = {}) {
  */
 
 async function loadWalletContents() {
-  const url = VERAMO_AGENT_BASE_URL + '/agent/dataStoreORMGetVerifiableCredentials';
-  const response = await postData(url);
+  console.log('loadWalletContents...');
+  const {veramoAgentUrl, veramoAgentApiKey} = loadCurrentVeramoAgent();
+  const url = veramoAgentUrl + '/agent/dataStoreORMGetVerifiableCredentials';
+  const response = await postData({url: url, token: veramoAgentApiKey});
   return response.json();
 }
 
 async function createVerifiablePresentation({holder, verifiableCredential}) {
+
+  const {veramoAgentUrl, veramoAgentApiKey} = loadCurrentVeramoAgent();
 
   const data = 
   {
@@ -95,8 +117,8 @@ async function createVerifiablePresentation({holder, verifiableCredential}) {
     proofFormat: 'jwt'
   }  
 
-  const url = VERAMO_AGENT_BASE_URL + '/agent/createVerifiablePresentation';
-  const response = await postData(url, data);
+  const url = veramoAgentUrl + '/agent/createVerifiablePresentation';
+  const response = await postData({url: url, data: data, token:veramoAgentApiKey});
   return response.json();
 }
 
@@ -168,15 +190,27 @@ function getCredentialType(vc) {
  */
 
 function loadCurrentVeramoAgent() {
-  return Cookies.get('veramoAgent') || '';
+  console.log('Loading veramoAgent cookie.');
+  const config = {
+    veramoAgentUrl: (Cookies.get('veramoAgentUrl')) || '',
+    veramoAgentApiKey: (Cookies.get('veramoAgentApiKey')  || '')
+  };
+  console.log('cookie: veramoAgentUrl: ' + config.veramoAgentUrl);
+  console.log('cookie: veramoAgentApiKey: ' + config.veramoAgentApiKey);
+
+  return config;
 }
 
-function saveCurrentVeramoAgent(url) {
+function saveCurrentVeramoAgent({veramoAgentUrl, veramoAgentApiKey}) {
   console.log('Setting veramoAgent cookie.');
-  Cookies.set('veramoAgent', url, {path: '', secure: true, sameSite: 'None'});
+  console.log('cookie: veramoAgentUrl: ' + veramoAgentUrl);
+  console.log('cookie: veramoAgentApiKey: ' + veramoAgentApiKey);
+  Cookies.set('veramoAgentUrl', veramoAgentUrl, {path: '', secure: true, sameSite: 'None'});
+  Cookies.set('veramoAgentApiKey', veramoAgentApiKey, {path: '', secure: true, sameSite: 'None'});
 }
 
 function resetCurrentVeramoAgent() {
   console.log('Clearing veramoAgent cookie.');
-  Cookies.remove('veramoAgent', {path: ''});
+  Cookies.remove('veramoAgentUrl', {path: ''});
+  Cookies.remove('veramoAgentApiKey', {path: ''});
 }
