@@ -109,7 +109,7 @@ async function loadWalletContents() {
   return response.json();
 }
 
-async function createVerifiablePresentation({holder, verifiableCredential}) {
+async function createVerifiablePresentation({holder, verifiableCredential, proofFormat = 'jwt'}) {
   const {veramoAgentUrl, veramoAgentApiKey} = loadCurrentVeramoAgent();
   const data = 
   {
@@ -120,7 +120,7 @@ async function createVerifiablePresentation({holder, verifiableCredential}) {
       issuanceDate: new Date().toISOString(),
       verifiableCredential: [verifiableCredential],
     },
-    proofFormat: 'jwt'
+    proofFormat: proofFormat
   }  
 
   const url = veramoAgentUrl + '/agent/createVerifiablePresentation';
@@ -141,7 +141,7 @@ function clearWalletDisplay() {
 function addToWalletDisplay({text, walletEntry, shareButton}) {
   const li = document.createElement('li');
 
-  if (walletEntry && typeof walletEntry.verifiableCredential.proof.jwt !== 'undefined') {
+  if (walletEntry) {
     const showButtonNode = document.createElement('a');
     showButtonNode.classList.add('waves-effect', 'waves-light', 'btn-small');
     showButtonNode.setAttribute('id', 'show-' + walletEntry.hash);
@@ -154,18 +154,26 @@ function addToWalletDisplay({text, walletEntry, shareButton}) {
     });
 
     if(shareButton) {
+      li.appendChild(document.createTextNode(' '));
       const shareButtonNode = document.createElement('a');
       shareButtonNode.classList.add('waves-effect', 'waves-light', 'btn-small');
       shareButtonNode.setAttribute('id', walletEntry.hash);
       shareButtonNode.appendChild(document.createTextNode(shareButton.text));
-      li.appendChild(shareButtonNode);
-      li.appendChild(document.createTextNode(' '));
+      li.appendChild(shareButtonNode);     
   
-      document.getElementById(walletEntry.hash).addEventListener('click', async () => {
+      shareButtonNode.addEventListener('click', async () => {
+      // document.getElementById(walletEntry.hash).addEventListener('click', async () => {
   
-        const vp = await createVerifiablePresentation( 
-          { holder: walletEntry.verifiableCredential.credentialSubject.id,
-            verifiableCredential: walletEntry.verifiableCredential.proof.jwt });
+        let vp = null;
+        if (walletEntry.verifiableCredential.proof.type === 'JwtProof2020') {
+          vp = await createVerifiablePresentation( 
+            { holder: walletEntry.verifiableCredential.credentialSubject.id,
+              verifiableCredential: walletEntry.verifiableCredential.proof.jwt });
+        } else {
+          vp = await createVerifiablePresentation( 
+            { holder: walletEntry.verifiableCredential.credentialSubject.id,
+              verifiableCredential: walletEntry.verifiableCredential, proofFormat: 'lds' });
+        }
   
         console.log('wrapping and returning vc:', vp);
   
