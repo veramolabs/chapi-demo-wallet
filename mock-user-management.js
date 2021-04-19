@@ -109,17 +109,27 @@ async function loadWalletContents() {
   return response.json();
 }
 
-async function createVerifiablePresentation({holder, verifiableCredential, proofFormat = 'jwt'}) {
+async function createVerifiablePresentation({holder, verifiableCredential, proofFormat = 'jwt', domain, challenge}) {
   const {veramoAgentUrl, veramoAgentApiKey} = loadCurrentVeramoAgent();
-  const data = 
-  {
-    presentation: {
-      holder: holder,
-      '@context': ['https://www.w3.org/2018/credentials/v1'],
-      type: ['VerifiablePresentation'],
+
+  let presentation = {
+    holder: holder,
+    '@context': ['https://www.w3.org/2018/credentials/v1'],
+    type: ['VerifiablePresentation'],    
+    verifiableCredential: [verifiableCredential]
+  }
+
+  if(proofFormat === 'jwt') {
+    presentation = {
+      ... presentation,
       issuanceDate: new Date().toISOString(),
-      verifiableCredential: [verifiableCredential],
-    },
+    }
+  }
+
+  const data = {
+    presentation,
+    challenge,
+    domain,
     proofFormat: proofFormat
   }  
 
@@ -168,11 +178,15 @@ function addToWalletDisplay({text, walletEntry, shareButton}) {
         if (walletEntry.verifiableCredential.proof.type === 'JwtProof2020') {
           vp = await createVerifiablePresentation( 
             { holder: walletEntry.verifiableCredential.credentialSubject.id,
-              verifiableCredential: walletEntry.verifiableCredential.proof.jwt });
+              verifiableCredential: walletEntry.verifiableCredential.proof.jwt, 
+              domain: shareButton.domain,
+              challenge: shareButton.challenge });
         } else {
           vp = await createVerifiablePresentation( 
             { holder: walletEntry.verifiableCredential.credentialSubject.id,
-              verifiableCredential: walletEntry.verifiableCredential, proofFormat: 'lds' });
+              verifiableCredential: walletEntry.verifiableCredential, proofFormat: 'lds',
+              domain: shareButton.domain,
+              challenge: shareButton.challenge });
         }
   
         console.log('wrapping and returning vc:', vp);
