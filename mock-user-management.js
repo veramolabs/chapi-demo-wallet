@@ -113,6 +113,7 @@ async function createVerifiablePresentation({holder, verifiableCredential, proof
   const {veramoAgentUrl, veramoAgentApiKey} = loadCurrentVeramoAgent();
 
   let presentation = {
+    verifier: [],
     holder: holder,
     '@context': ['https://www.w3.org/2018/credentials/v1'],
     type: ['VerifiablePresentation'],    
